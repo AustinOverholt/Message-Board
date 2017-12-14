@@ -5,12 +5,29 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var Comment = require('./model/comments');
 //and create our instances
 var app = express();
 var router = express.Router();
 //set our port to either a predetermined port number if you have set 
 //it up, or 3001
 var port = process.env.API_PORT || 3001;
+
+// for db config 
+var fs = require('fs'),
+configPath = './config.json';
+var parsed = JSON.parse(fs.readFileSync(configPath, 'UTF-8'));
+exports.storageConfig=  parsed;
+
+console.log('mongodb://' + parsed.dbUser + ':' + parsed.dbPassword + parsed.dbHost);
+
+//db config
+mongoose.connect('mongodb://' + parsed.dbUser + ':' + parsed.dbPassword + parsed.dbHost);
+
+// example
+// mongoose.connect('mongodb://<dbuser>:<dbpassword>@ds019836.mlab.com:19836/bryandb');
+
+
 //now we should configure the API to use bodyParser and look for 
 //JSON data in the request body
 app.use(bodyParser.urlencoded({ extended: true }));
