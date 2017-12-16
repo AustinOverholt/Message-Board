@@ -19,12 +19,10 @@ configPath = './config.json';
 var parsed = JSON.parse(fs.readFileSync(configPath, 'UTF-8'));
 exports.storageConfig=  parsed;
 
-console.log('mongodb://' + parsed.dbUser + ':' + parsed.dbPassword + parsed.dbHost);
-
 //db config
-mongoose.connect('mongodb://' + parsed.dbUser + ':' + parsed.dbPassword + parsed.dbHost);
+mongoose.connect('mongodb://' + parsed.dbUser + ':' + parsed.dbPassword + parsed.dbHost, {useMongoClient: true});
 
-// example
+// change connection string above! example below.
 // mongoose.connect('mongodb://<dbuser>:<dbpassword>@ds019836.mlab.com:19836/bryandb');
 
 
@@ -76,6 +74,35 @@ router.get('/', function(req, res) {
     res.json({ message: 'Comment successfully added!' });
     });
 });
+
+router.route('/comments/:comment_id')
+//The put method gives us the chance to update our comment based on 
+//the ID passed to the route
+ .put(function(req, res) {
+ Comment.findById(req.params.comment_id, function(err, comment) {
+ if (err)
+ res.send(err);
+ //setting the new author and text to whatever was changed. If 
+//nothing was changed we will not alter the field.
+ (req.body.author) ? comment.author = req.body.author : null;
+ (req.body.text) ? comment.text = req.body.text : null;
+ //save comment
+ comment.save(function(err) {
+ if (err)
+ res.send(err);
+ res.json({ message: 'Comment has been updated' });
+ });
+ });
+ })
+ //delete method for removing a comment from our database
+ .delete(function(req, res) {
+ //selects the comment by its ID, then removes it.
+ Comment.remove({ _id: req.params.comment_id }, function(err, comment) {
+ if (err)
+ res.send(err);
+ res.json({ message: 'Comment has been deleted' })
+ })
+ });
 
 //Use our router configuration when we call /api
 app.use('/api', router);
