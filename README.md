@@ -1,2 +1,2 @@
-# React-App
-A React App 
+# Message-Board
+This is a message board application built using the MERN stack.
